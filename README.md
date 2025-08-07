@@ -275,6 +275,7 @@ Components v2 goes far beyond embed limitations:
 ### Message Complexity
 - Maximum 40 total components per message
 - Plan your component hierarchy before building
+- all sections must have a thumbnail or a button accessory 
 - Use separators strategically to avoid visual clutter
 
 ### Network Efficiency
