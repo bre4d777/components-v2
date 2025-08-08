@@ -387,25 +387,20 @@ function createAdaptiveSection(title, content, hasAction = false) {
 
 ## Best Practices
 
-### 1. Visual Balance
-- Don't put accessories on every section
-- Mix sections with and without accessories for visual variety
-- Use separators to group related sections
-
-### 2. Content Organization
+### 1. Content Organization
 - Put most important information in the first text display
 - Use the second and third displays for supporting details
 - Keep related information within the same section
 
-### 3. Interaction Design
+### 2. Interaction Design
 - Make button labels clear and action-oriented
 - Use appropriate button styles for the action type
 - Consider the user's mental model when placing buttons
 
-### 4. Performance Considerations
+### 3. Performance Considerations
 - Sections count toward the 40-component limit
 - Each text display within a section counts as a separate component
 - Plan your component budget carefully
 
 ## Next Steps
-[next](./action-rows.md)
+[next](./3-action-rows.md)
