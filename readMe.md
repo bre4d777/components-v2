@@ -135,5 +135,7 @@ Open an issue or send a pull request anytime.
 ---
 
 **Ready to get started?** Jump into the [Getting Started Guide](1-basics.md) and start building cleaner, more interactive bot messages.
-Consider Giving a start if this helped you
+
+
+Consider Giving a star ⭐ if this helped you
 ---
