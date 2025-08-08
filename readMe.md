@@ -129,7 +129,7 @@ Open an issue or send a pull request anytime.
 ## Special Thanks
 
 * The Discord.js team for building the foundation
-* [@MoonCarli](https://github.com/MoonCarli) - ransi ka baccha
+* [@MoonCarli](https://github.com/MoonCarli) - randi ka baccha
 * Everyone contributing to this guide and helping others learn
 
 ---
