@@ -42,31 +42,26 @@ const actionRow = new ActionRowBuilder()
 ```javascript
 const { ButtonStyle } = require('discord.js');
 
-// Primary - Main call-to-action
 const primaryButton = new ButtonBuilder()
     .setCustomId('main_action')
     .setLabel('Get Started')
     .setStyle(ButtonStyle.Primary);
 
-// Secondary - Alternative actions
 const secondaryButton = new ButtonBuilder()
     .setCustomId('learn_more')
     .setLabel('Learn More')
     .setStyle(ButtonStyle.Secondary);
 
-// Success - Positive confirmations
 const successButton = new ButtonBuilder()
     .setCustomId('confirm_action')
     .setLabel('Confirm')
     .setStyle(ButtonStyle.Success);
 
-// Danger - Destructive actions
 const dangerButton = new ButtonBuilder()
     .setCustomId('delete_item')
     .setLabel('Delete')
     .setStyle(ButtonStyle.Danger);
 
-// Link - External URLs (no custom ID needed)
 const linkButton = new ButtonBuilder()
     .setURL('https://discord.js.org')
     .setLabel('Visit Discord.js')
@@ -80,24 +75,20 @@ const button = new ButtonBuilder()
     .setCustomId('advanced_button')
     .setLabel('Advanced Button')
     .setStyle(ButtonStyle.Primary)
-    .setEmoji('🚀')                    // Add emoji to button
-    .setDisabled(false);               // Enable/disable button
+    .setEmoji('rocket')
+    .setDisabled(false);
 ```
 
 ### Emoji Usage in Buttons
 
 ```javascript
-// Unicode emoji
-.setEmoji('🎮')
+.setEmoji('gamepad')
 
-// Custom emoji (requires emoji ID)
 .setEmoji('custom_emoji_id')
 
-// Emoji with label
-.setEmoji('⚡').setLabel('Fast Action')
+.setEmoji('zap').setLabel('Fast Action')
 
-// Emoji only (no label)
-.setEmoji('❌')  // Common for close/cancel buttons
+.setEmoji('x')
 ```
 
 ## Select Menus in Action Rows
@@ -120,18 +111,18 @@ const selectMenu = new StringSelectMenuBuilder()
             .setLabel('Gaming')
             .setValue('gaming')
             .setDescription('Gaming related commands')
-            .setEmoji('🎮'),
+            .setEmoji('gamepad'),
         new StringSelectMenuOptionBuilder()
             .setLabel('Music')
             .setValue('music')
             .setDescription('Music and audio commands')
-            .setEmoji('🎵'),
+            .setEmoji('musical_note'),
         new StringSelectMenuOptionBuilder()
             .setLabel('Moderation')
             .setValue('moderation')
             .setDescription('Server moderation tools')
-            .setEmoji('🔨')
-            .setDefault(true)  // Pre-selected option
+            .setEmoji('hammer')
+            .setDefault(true)
     );
 
 const selectActionRow = new ActionRowBuilder()
@@ -148,29 +139,25 @@ const {
     MentionableSelectMenuBuilder 
 } = require('discord.js');
 
-// User selection
 const userSelect = new UserSelectMenuBuilder()
     .setCustomId('select_users')
     .setPlaceholder('Select users')
     .setMinValues(1)
     .setMaxValues(5);
 
-// Role selection
 const roleSelect = new RoleSelectMenuBuilder()
     .setCustomId('select_roles')
     .setPlaceholder('Select roles')
     .setMinValues(1)
     .setMaxValues(3);
 
-// Channel selection with types
 const channelSelect = new ChannelSelectMenuBuilder()
     .setCustomId('select_channels')
     .setPlaceholder('Select channels')
-    .setChannelTypes([0, 2])  // Text and voice channels only
+    .setChannelTypes([0, 2])
     .setMinValues(1)
     .setMaxValues(2);
 
-// Mentionable (users + roles)
 const mentionableSelect = new MentionableSelectMenuBuilder()
     .setCustomId('select_mentions')
     .setPlaceholder('Select users or roles')
@@ -186,18 +173,16 @@ const mentionableSelect = new MentionableSelectMenuBuilder()
 function createNavigationRow(currentPage, totalPages) {
     const components = [];
     
-    // Previous button
     if (currentPage > 1) {
         components.push(
             new ButtonBuilder()
                 .setCustomId('nav_previous')
                 .setLabel('Previous')
-                .setEmoji('⬅️')
+                .setEmoji('left_arrow')
                 .setStyle(ButtonStyle.Secondary)
         );
     }
     
-    // Page indicator
     components.push(
         new ButtonBuilder()
             .setCustomId('page_info')
@@ -206,13 +191,12 @@ function createNavigationRow(currentPage, totalPages) {
             .setDisabled(true)
     );
     
-    // Next button
     if (currentPage < totalPages) {
         components.push(
             new ButtonBuilder()
                 .setCustomId('nav_next')
                 .setLabel('Next')
-                .setEmoji('➡️')
+                .setEmoji('right_arrow')
                 .setStyle(ButtonStyle.Secondary)
         );
     }
@@ -235,16 +219,15 @@ function createConfirmationRow(actionId, dangerLevel = 'normal') {
                 .setCustomId(`confirm_${actionId}`)
                 .setLabel('Confirm')
                 .setStyle(confirmStyle)
-                .setEmoji('✅'),
+                .setEmoji('check'),
             new ButtonBuilder()
                 .setCustomId(`cancel_${actionId}`)
                 .setLabel('Cancel')
                 .setStyle(ButtonStyle.Secondary)
-                .setEmoji('❌')
+                .setEmoji('x')
         );
 }
 
-// Usage
 const deleteConfirmation = createConfirmationRow('delete_user', 'high');
 const saveConfirmation = createConfirmationRow('save_settings', 'normal');
 ```
@@ -256,23 +239,23 @@ const quickActionsRow = new ActionRowBuilder()
     .addComponents(
         new ButtonBuilder()
             .setCustomId('quick_help')
-            .setEmoji('❓')
+            .setEmoji('question')
             .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
             .setCustomId('quick_settings')
-            .setEmoji('⚙️')
+            .setEmoji('gear')
             .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
             .setCustomId('quick_stats')
-            .setEmoji('📊')
+            .setEmoji('bar_chart')
             .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
             .setCustomId('quick_refresh')
-            .setEmoji('🔄')
+            .setEmoji('arrows_counterclockwise')
             .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
             .setCustomId('quick_close')
-            .setEmoji('❌')
+            .setEmoji('x')
             .setStyle(ButtonStyle.Secondary)
     );
 ```
@@ -293,7 +276,6 @@ class ActionRowFactory {
                 .setDisabled(action.disabled || false);
         });
         
-        // Split into multiple rows if more than 5 buttons
         const rows = [];
         for (let i = 0; i < buttons.length; i += 5) {
             const rowButtons = buttons.slice(i, i + 5);
@@ -323,11 +305,10 @@ class ActionRowFactory {
     }
 }
 
-// Usage examples
 const dynamicActions = [
     { id: 'action_1', label: 'Action 1', style: ButtonStyle.Primary },
     { id: 'action_2', label: 'Action 2', style: ButtonStyle.Secondary },
-    { id: 'action_3', label: 'Action 3', style: ButtonStyle.Success, emoji: '✅' }
+    { id: 'action_3', label: 'Action 3', style: ButtonStyle.Success, emoji: 'check' }
 ];
 
 const actionRows = ActionRowFactory.createFromArray(dynamicActions);
@@ -362,7 +343,7 @@ class StatefulActionRow {
                     .setCustomId(`${this.baseId}_start`)
                     .setLabel('Start Process')
                     .setStyle(ButtonStyle.Primary)
-                    .setEmoji('▶️')
+                    .setEmoji('play')
             );
     }
     
@@ -373,7 +354,7 @@ class StatefulActionRow {
                     .setCustomId(`${this.baseId}_loading`)
                     .setLabel('Processing...')
                     .setStyle(ButtonStyle.Secondary)
-                    .setEmoji('⏳')
+                    .setEmoji('hourglass')
                     .setDisabled(true)
             );
     }
@@ -385,12 +366,12 @@ class StatefulActionRow {
                     .setCustomId(`${this.baseId}_retry`)
                     .setLabel('Retry')
                     .setStyle(ButtonStyle.Danger)
-                    .setEmoji('🔄'),
+                    .setEmoji('arrows_counterclockwise'),
                 new ButtonBuilder()
                     .setCustomId(`${this.baseId}_cancel`)
                     .setLabel('Cancel')
                     .setStyle(ButtonStyle.Secondary)
-                    .setEmoji('❌')
+                    .setEmoji('x')
             );
     }
     
@@ -401,13 +382,13 @@ class StatefulActionRow {
                     .setCustomId(`${this.baseId}_complete`)
                     .setLabel('Complete!')
                     .setStyle(ButtonStyle.Success)
-                    .setEmoji('✅')
+                    .setEmoji('check')
                     .setDisabled(true),
                 new ButtonBuilder()
                     .setCustomId(`${this.baseId}_new`)
                     .setLabel('Start New')
                     .setStyle(ButtonStyle.Primary)
-                    .setEmoji('🆕')
+                    .setEmoji('sparkles')
             );
     }
     
@@ -433,13 +414,9 @@ const {
 
 const fullContainer = new ContainerBuilder()
     .setAccentColor(0x5865F2)
-    
-    // Header
     .addTextDisplayComponents(
         new TextDisplayBuilder().setContent('# User Management Panel')
     )
-    
-    // User info section
     .addSectionComponents(
         new SectionBuilder()
             .addTextDisplayComponents(
@@ -452,15 +429,11 @@ const fullContainer = new ContainerBuilder()
                     .setDescription('User avatar')
             )
     )
-    
-    // Separator
     .addSeparatorComponents(
         new SeparatorBuilder()
             .setSpacing(SeparatorSpacingSize.Large)
             .setDivider(true)
     )
-    
-    // Quick actions
     .addActionRowComponents(
         new ActionRowBuilder()
             .addComponents(
@@ -468,26 +441,24 @@ const fullContainer = new ContainerBuilder()
                     .setCustomId('user_warn')
                     .setLabel('Warn')
                     .setStyle(ButtonStyle.Secondary)
-                    .setEmoji('⚠️'),
+                    .setEmoji('warning'),
                 new ButtonBuilder()
                     .setCustomId('user_timeout')
                     .setLabel('Timeout')
                     .setStyle(ButtonStyle.Secondary)
-                    .setEmoji('⏰'),
+                    .setEmoji('clock'),
                 new ButtonBuilder()
                     .setCustomId('user_kick')
                     .setLabel('Kick')
                     .setStyle(ButtonStyle.Danger)
-                    .setEmoji('👢'),
+                    .setEmoji('athletic_shoe'),
                 new ButtonBuilder()
                     .setCustomId('user_ban')
                     .setLabel('Ban')
                     .setStyle(ButtonStyle.Danger)
-                    .setEmoji('🔨')
+                    .setEmoji('hammer')
             )
     )
-    
-    // Role management
     .addActionRowComponents(
         new ActionRowBuilder()
             .addComponents(
@@ -500,27 +471,103 @@ const fullContainer = new ContainerBuilder()
     );
 ```
 
+## Collector Integration with Component Disabling
+
+When using collectors with Components v2, properly disable interactive elements when they expire:
+
+```javascript
+_setupButtonCollector(messageOrInteraction, guildId, client, userId) {
+    const message = messageOrInteraction.fetchReply ? messageOrInteraction : messageOrInteraction;
+    const filter = (i) => i.user.id === userId && i.customId.endsWith(`_${guildId}`);
+    const collector = message.createMessageComponentCollector({ filter, time: 300_000, max: 1 });
+
+    collector.on("collect", async (interaction) => {
+        await interaction.deferUpdate();
+        
+        // Handle interaction logic here
+        
+        await interaction.editReply({ 
+            components: [newContainer],
+            flags: MessageFlags.IsComponentsV2 
+        });
+    });
+
+    collector.on("end", async (collected, reason) => {
+        if (reason === 'limit') return;
+
+        try {
+            const currentMessage = await message.fetch().catch(() => null);
+            if (!currentMessage?.components?.length) return;
+
+            const containerComponent = currentMessage.components.find(
+                (c) => c.type === ComponentType.Container
+            );
+            
+            if (!containerComponent) return;
+
+            const container = ContainerBuilder.from(containerComponent);
+
+            for (const comp of container.components) {
+                if (comp instanceof ActionRowBuilder) {
+                    comp.components.forEach((inner) => {
+                        if (
+                            inner instanceof StringSelectMenuBuilder ||
+                            inner instanceof UserSelectMenuBuilder ||
+                            inner instanceof RoleSelectMenuBuilder ||
+                            inner instanceof ChannelSelectMenuBuilder ||
+                            inner instanceof MentionableSelectMenuBuilder
+                        ) {
+                            inner.setDisabled(true);
+                        }
+                        else if (
+                            inner instanceof ButtonBuilder &&
+                            inner.data.style !== ButtonStyle.Link
+                        ) {
+                            inner.setDisabled(true);
+                        }
+                    });
+                }
+                else if (comp instanceof SectionBuilder && comp.accessory?.data) {
+                    if (comp.accessory.data.type === ComponentType.Button) {
+                        comp.accessory.data.disabled = true;
+                    }
+                }
+            }
+
+            await currentMessage.edit({
+                components: [container],
+                flags: MessageFlags.IsComponentsV2
+            });
+        } catch (error) {
+            if (error.code !== 10008) {
+                client.logger?.error("Component", `Error disabling components: ${error.message}`, error);
+            }
+        }
+    });
+}
+```
+
 ## Best Practices
 
-### 1. Button Design
+### Button Design
 - Use clear, action-oriented labels
 - Apply appropriate styles for the action type
 - Include emoji for visual clarity but don't overdo it
 - Disable buttons when actions aren't available
 
-### 2. Select Menu Design
+### Select Menu Design
 - Write descriptive placeholders
 - Set appropriate min/max values
 - Use option descriptions to clarify choices
 - Pre-select sensible defaults when appropriate
 
-### 3. Layout Considerations
+### Layout Considerations
 - Group related actions together
 - Use consistent emoji and styling themes
 - Consider mobile users - buttons should be easily tappable
 - Don't overcrowd action rows
 
-### 4. State Management
+### State Management
 - Disable buttons during processing
 - Update button states to reflect current status
 - Provide clear feedback for user actions
@@ -528,13 +575,12 @@ const fullContainer = new ContainerBuilder()
 
 ## Interaction Handling
 
-Remember that action rows require proper interaction handling:
+Action rows require proper interaction handling:
 
 ```javascript
 client.on('interactionCreate', async interaction => {
     if (!interaction.isButton() && !interaction.isStringSelectMenu()) return;
     
-    // Handle button interactions
     if (interaction.isButton()) {
         switch (interaction.customId) {
             case 'confirm_action':
@@ -553,7 +599,6 @@ client.on('interactionCreate', async interaction => {
         }
     }
     
-    // Handle select menu interactions
     if (interaction.isStringSelectMenu()) {
         const selectedValues = interaction.values;
         await interaction.reply({
@@ -563,5 +608,3 @@ client.on('interactionCreate', async interaction => {
     }
 });
 ```
-### Next
-[next](./4-file-builder.md)
