@@ -1,94 +1,111 @@
-DISCORD.JS COMPONENTS V2 
+DISCORD.JS COMPONENTS V2
 
 ========== LIMITS ==========
 - 40 max components per message (every builder instance counts)
 - ActionRow: max 5 buttons OR 1 select menu
 - SelectMenu: max 25 options
 - Section: max 3 TextDisplayBuilders
+- Container: max 10 top-level components inside
 
 ========== MESSAGE FLAGS ==========
 MessageFlags.IsComponentsV2 - REQUIRED for v2 components
 MessageFlags.Ephemeral - only user sees message
 MessageFlags.SuppressNotifications - silent message
 
-When IsComponentsV2 is set:
-- content field NOT allowed
-- stickers NOT allowed
-- polls NOT allowed
-- embeds NOT allowed
-Only components array is valid.
+When IsComponentsV2 is set, NOT ALLOWED:
+- content field
+- embeds
+- stickers
+- polls
+Only components array and files array are valid.
 
-========== COMPONENTS CAN BE STANDALONE ==========
-Any component can be sent directly in array, Container is optional wrapper:
+========== STANDALONE COMPONENTS ==========
+Any component can be sent directly without Container:
 components: [textDisplay]
-components: [container]
 components: [separator, textDisplay, actionRow]
+Container is optional wrapper, not required.
 
 ========== IMPORTS ==========
 ContainerBuilder, TextDisplayBuilder, SeparatorBuilder, SeparatorSpacingSize,
 SectionBuilder, ThumbnailBuilder, ButtonBuilder, ActionRowBuilder,
-StringSelectMenuBuilder, ButtonStyle, ComponentType, MessageFlags
+StringSelectMenuBuilder, ButtonStyle, ComponentType, MessageFlags,
+FileBuilder, AttachmentBuilder, MediaGalleryBuilder, MediaGalleryItemBuilder
 
-========== SEPARATOR SPACING ==========
-Only two options:
+========== CONTAINER ==========
+Optional wrapper with accent color and spoiler support.
+new ContainerBuilder()
+  .setAccentColor(0x5865F2)  // left color bar like embed
+  .setSpoiler(true)          // hide behind spoiler
+  .setId(1)                  // optional identifier
+  .addTextDisplayComponents(...)
+  .addSeparatorComponents(...)
+  .addSectionComponents(...)
+  .addActionRowComponents(...)
+  .addFileComponents(...)
+  .addMediaGalleryComponents(...)
+
+========== SEPARATOR ==========
+Only two spacing options:
 - SeparatorSpacingSize.Small
 - SeparatorSpacingSize.Large
 Optional: .setDivider(true) adds visible line
 
-========== SECTION RULE ==========
-Use Section ONLY when you need:
-- Thumbnail accessory (image on right)
-- Button accessory (single button on right)
+========== SECTION ==========
+Use ONLY when you need thumbnail OR button accessory.
 Max 3 TextDisplayBuilders per Section.
-Can have ONE accessory type, not both.
+ONE accessory type only (not both).
+Accessory appears on right side.
 Otherwise use TextDisplayBuilder directly.
 
-========== BASIC USAGE ==========
-const container = new ContainerBuilder();
-container.addTextDisplayComponents(new TextDisplayBuilder().setContent('## Title'));
-container.addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true));
-container.addSectionComponents(
-  new SectionBuilder()
-    .addTextDisplayComponents(new TextDisplayBuilder().setContent('**Title**\nDesc'))
-    .setThumbnailAccessory(new ThumbnailBuilder().setURL(imageUrl))
-);
-container.addActionRowComponents(
-  new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId('id').setLabel('Click').setStyle(ButtonStyle.Primary)
+new SectionBuilder()
+  .addTextDisplayComponents(
+    new TextDisplayBuilder().setContent('**Title**'),
+    new TextDisplayBuilder().setContent('Description'),
+    new TextDisplayBuilder().setContent('Details')
   )
-);
-await channel.send({ components: [container], flags: MessageFlags.IsComponentsV2 });
+  .setThumbnailAccessory(new ThumbnailBuilder().setURL(url).setDescription('alt text'))
+  // OR
+  .setButtonAccessory(new ButtonBuilder().setCustomId('id').setStyle(ButtonStyle.Secondary))
 
-========== DISABLING COMPONENTS ==========
-async disableComponents(message) {
-  if (!message?.components?.length) return;
-  const disabled = message.components.map(c => this._processComponent(c));
-  await message.edit({ components: disabled, flags: MessageFlags.IsComponentsV2 });
-}
+========== THUMBNAIL ==========
+new ThumbnailBuilder()
+  .setURL('https://image.url')
+  .setDescription('Alt text')
+  .setSpoiler(false)
 
-_processComponent(comp) {
-  const json = comp.toJSON();
-  
-  if (comp.type === ComponentType.ActionRow) {
-    json.components = comp.components.map(sub => {
-      const sj = sub.toJSON();
-      return sj.type === ComponentType.Button && sj.style === ButtonStyle.Link ? sj : { ...sj, disabled: true };
-    });
-  }
-  
-  if (comp.type === ComponentType.Container) {
-    json.components = comp.components.map(c => this._processComponent(c));
-  }
-  
-  if (comp.type === ComponentType.Section) {
-    json.components = comp.components.map(c => this._processComponent(c));
-    if (comp.accessory?.type === ComponentType.Button) {
-      const aj = comp.accessory.toJSON();
-      json.accessory = aj.style === ButtonStyle.Link ? aj : { ...aj, disabled: true };
-    }
-  }
-  return json;
-}
+========== FILE COMPONENT ==========
+Displays attached files within layout instead of below message.
+Requires matching AttachmentBuilder in files array.
+URL must match attachment name exactly.
+Audio files cannot be played inside v2 components.
+
+const attachment = new AttachmentBuilder(buffer, { name: 'file.png' });
+const fileComponent = new FileBuilder()
+  .setURL('attachment://file.png')
+  .setSpoiler(false)
+  .setId(1);
+
+container.addFileComponents(fileComponent);
+
+========== MEDIA GALLERY ==========
+Displays images in grid layout.
+Requires AttachmentBuilder for local files.
+Can use direct URLs for external images.
+
+const attachment = new AttachmentBuilder(buffer, { name: 'img.png' });
+const gallery = new MediaGalleryBuilder()
+  .addItems(
+    new MediaGalleryItemBuilder()
+      .setURL('attachment://img.png')
+      .setDescription('Image description')
+      .setSpoiler(false),
+    new MediaGalleryItemBuilder()
+      .setURL('https://external.url/image.png')
+      .setDescription('External image')
+  );
+
+container.addMediaGalleryComponents(gallery);
+// files: [attachment] required for local attachments
 
 ========== BUTTON STYLES ==========
 ButtonStyle.Primary - blue
@@ -111,6 +128,37 @@ new StringSelectMenuBuilder()
 -# Small muted text
 [Link](url)
 
+========== DISABLING COMPONENTS ==========
+async disableComponents(message) {
+  if (!message?.components?.length) return;
+  const disabled = message.components.map(c => processComponent(c));
+  await message.edit({ components: disabled, flags: MessageFlags.IsComponentsV2 });
+}
+
+function processComponent(comp) {
+  const json = comp.toJSON();
+  
+  if (comp.type === ComponentType.ActionRow) {
+    json.components = comp.components.map(sub => {
+      const sj = sub.toJSON();
+      return sj.type === ComponentType.Button && sj.style === ButtonStyle.Link ? sj : { ...sj, disabled: true };
+    });
+  }
+  
+  if (comp.type === ComponentType.Container) {
+    json.components = comp.components.map(c => processComponent(c));
+  }
+  
+  if (comp.type === ComponentType.Section) {
+    json.components = comp.components.map(c => processComponent(c));
+    if (comp.accessory?.type === ComponentType.Button) {
+      const aj = comp.accessory.toJSON();
+      json.accessory = aj.style === ButtonStyle.Link ? aj : { ...aj, disabled: true };
+    }
+  }
+  return json;
+}
+
 ========== COLLECTOR ==========
 const collector = message.createMessageComponentCollector({
   time: 300_000,
@@ -119,5 +167,13 @@ const collector = message.createMessageComponentCollector({
 collector.on('collect', async i => { await i.deferUpdate(); });
 collector.on('end', async () => { await disableComponents(message); });
 
+========== SENDING ==========
+await channel.send({ 
+  components: [container], 
+  files: [attachment],  // required for FileBuilder and local MediaGallery items
+  flags: MessageFlags.IsComponentsV2 
+});
+
 ========== COUNT EXAMPLE ==========
-1 Container + 2 TextDisplay + 1 Separator + 1 Section + 1 ActionRow = 6 components
+Container(1) + TextDisplay(1) + Separator(1) + Section(1) + ActionRow(1) + File(1) + MediaGallery(1) = 7 components
+TextDisplays inside Section also count individually toward 40 limit
