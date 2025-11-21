@@ -1,0 +1,123 @@
+DISCORD.JS COMPONENTS V2 
+
+========== LIMITS ==========
+- 40 max components per message (every builder instance counts)
+- ActionRow: max 5 buttons OR 1 select menu
+- SelectMenu: max 25 options
+- Section: max 3 TextDisplayBuilders
+
+========== MESSAGE FLAGS ==========
+MessageFlags.IsComponentsV2 - REQUIRED for v2 components
+MessageFlags.Ephemeral - only user sees message
+MessageFlags.SuppressNotifications - silent message
+
+When IsComponentsV2 is set:
+- content field NOT allowed
+- stickers NOT allowed
+- polls NOT allowed
+- embeds NOT allowed
+Only components array is valid.
+
+========== COMPONENTS CAN BE STANDALONE ==========
+Any component can be sent directly in array, Container is optional wrapper:
+components: [textDisplay]
+components: [container]
+components: [separator, textDisplay, actionRow]
+
+========== IMPORTS ==========
+ContainerBuilder, TextDisplayBuilder, SeparatorBuilder, SeparatorSpacingSize,
+SectionBuilder, ThumbnailBuilder, ButtonBuilder, ActionRowBuilder,
+StringSelectMenuBuilder, ButtonStyle, ComponentType, MessageFlags
+
+========== SEPARATOR SPACING ==========
+Only two options:
+- SeparatorSpacingSize.Small
+- SeparatorSpacingSize.Large
+Optional: .setDivider(true) adds visible line
+
+========== SECTION RULE ==========
+Use Section ONLY when you need:
+- Thumbnail accessory (image on right)
+- Button accessory (single button on right)
+Max 3 TextDisplayBuilders per Section.
+Can have ONE accessory type, not both.
+Otherwise use TextDisplayBuilder directly.
+
+========== BASIC USAGE ==========
+const container = new ContainerBuilder();
+container.addTextDisplayComponents(new TextDisplayBuilder().setContent('## Title'));
+container.addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true));
+container.addSectionComponents(
+  new SectionBuilder()
+    .addTextDisplayComponents(new TextDisplayBuilder().setContent('**Title**\nDesc'))
+    .setThumbnailAccessory(new ThumbnailBuilder().setURL(imageUrl))
+);
+container.addActionRowComponents(
+  new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId('id').setLabel('Click').setStyle(ButtonStyle.Primary)
+  )
+);
+await channel.send({ components: [container], flags: MessageFlags.IsComponentsV2 });
+
+========== DISABLING COMPONENTS ==========
+async disableComponents(message) {
+  if (!message?.components?.length) return;
+  const disabled = message.components.map(c => this._processComponent(c));
+  await message.edit({ components: disabled, flags: MessageFlags.IsComponentsV2 });
+}
+
+_processComponent(comp) {
+  const json = comp.toJSON();
+  
+  if (comp.type === ComponentType.ActionRow) {
+    json.components = comp.components.map(sub => {
+      const sj = sub.toJSON();
+      return sj.type === ComponentType.Button && sj.style === ButtonStyle.Link ? sj : { ...sj, disabled: true };
+    });
+  }
+  
+  if (comp.type === ComponentType.Container) {
+    json.components = comp.components.map(c => this._processComponent(c));
+  }
+  
+  if (comp.type === ComponentType.Section) {
+    json.components = comp.components.map(c => this._processComponent(c));
+    if (comp.accessory?.type === ComponentType.Button) {
+      const aj = comp.accessory.toJSON();
+      json.accessory = aj.style === ButtonStyle.Link ? aj : { ...aj, disabled: true };
+    }
+  }
+  return json;
+}
+
+========== BUTTON STYLES ==========
+ButtonStyle.Primary - blue
+ButtonStyle.Secondary - gray
+ButtonStyle.Success - green
+ButtonStyle.Danger - red
+ButtonStyle.Link - requires .setURL(), no customId, cannot be disabled
+
+========== SELECT MENU ==========
+new StringSelectMenuBuilder()
+  .setCustomId('id')
+  .setPlaceholder('Select...')
+  .setMinValues(1)
+  .setMaxValues(n)
+  .addOptions([{ label: 'Name', value: 'val', description: 'Desc', emoji: '🎵' }])
+
+========== TEXT FORMATTING ==========
+## Header
+**Bold**
+-# Small muted text
+[Link](url)
+
+========== COLLECTOR ==========
+const collector = message.createMessageComponentCollector({
+  time: 300_000,
+  filter: i => i.user.id === userId
+});
+collector.on('collect', async i => { await i.deferUpdate(); });
+collector.on('end', async () => { await disableComponents(message); });
+
+========== COUNT EXAMPLE ==========
+1 Container + 2 TextDisplay + 1 Separator + 1 Section + 1 ActionRow = 6 components
